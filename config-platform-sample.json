@@ -3,26 +3,26 @@
     {
       "platform": "WiringPiJEMAPlatform",
       "name": "Pi JEMA (WiringPi)",
-      "overrideCache": "false",
-      "autoExport": "true",
+      "overrideCache": false,
+      "autoExport": true,
       "terminals": [
         {
           "name": "Floor heater",
           "monitorPin": {
             "pin": 18,
-            "enabled": "true",
+            "enabled": true,
             "mode": "in",
             "pull": "down",
-            "inverted": "true",
+            "inverted": true,
             "duration": 0,
-            "polling": "true"
+            "polling": true
           },
           "controlPin": {
             "pin": 23,
-            "enabled": "true",
+            "enabled": true,
             "mode": "out",
             "pull": "down",
-            "inverted": "false",
+            "inverted": false,
             "duration": 1000
           }
         }
