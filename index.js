@@ -1,7 +1,8 @@
 const wpi = require('node-wiring-pi');
 
 const sysfs = require('./lib/readExports.js');
-const GPIOAccessory = require('./lib/GPIOAccessory.js');
+// const GPIOAccessory = require('./lib/GPIOAccessory.js');
+const JEMAAccessory = require('./lib/JEMAAccessory.js');
 const AutoExport = require('./lib/autoExport.js');
 
 var Accessory, Service, Characteristic, UUIDGen;
@@ -17,16 +18,16 @@ module.exports = function(homebridge) {
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
 
-  homebridge.registerPlatform("homebridge-gpio-wpi2", "WiringPiPlatform", WPiPlatform, false);
+  homebridge.registerPlatform("homebridge-gpio-jema", "WiringPiJEMAPlatform", WPiPlatform, false);
 }
 
 // Platform constructor
-function WPiPlatform(log, config, api) {
-  log("WORK IN PROGRESS... Report issues on https://github.com/rsg98/homebridge-gpio-wpi2");
+function JEMAPlatform(log, config, api) {
+  log("WORK IN PROGRESS... Report issues on https://github.com/KAWABATANorio/homebridge-gpio-jema");
   var platform = this;
   this.log = log;
   this.config = config;
-  this.gpiopins = this.config.gpiopins || [];
+  this.gpiopins = this.config.terminals.gpiopins || [];
   this.accessories = [];
 
   //Export pins via sysfs if enabled with autoExport
@@ -49,7 +50,8 @@ function WPiPlatform(log, config, api) {
       // Or start discover new accessories
       this.api.on('didFinishLaunching', function() {
         platform.log("Loading cached GPIO pins complete");
-        for ( var i in this.gpiopins ) { this.addGPIOPin(this.gpiopins[i]); }
+        // for ( var i in this.gpiopins ) { this.addGPIOPin(this.gpiopins[i]); }
+        for ( var i in this.terminals ) { this.addTerminal(this.terminals[i]); }
         
         //Start polling all pins...
         this.statePolling();
@@ -63,7 +65,8 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
   var platform = this;
 
   if(platform.config.overrideCache === "true") {
-    var newContext = platform.gpiopins.find( p => p.name === accessory.context.name );
+    var newContext = platform.terminals.find( p => p.name === accessory.context.name );
+    // var newContext = platform.gpiopins.find( p => p.name === accessory.context.name );
     accessory.context = newContext;
   }
 
@@ -83,21 +86,30 @@ WPiPlatform.prototype.configureAccessory = function(accessory) {
     onChar = accessory.getService(Service.Switch).getCharacteristic(Characteristic.On);
   }
   
-  var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, onChar);
+  // var gpioAccessory = new GPIOAccessory(platform.log, accessory, wpi, onChar);
+  var jemaAccessory = new JEMAAccessory(platform.log, accessory, wpi, onChar);
 
+  // accessory.getService(Service.Switch)
+  //   .getCharacteristic(Characteristic.On)
+  //   .on('get', gpioAccessory.getOn.bind(gpioAccessory))
+  //   .on('set', gpioAccessory.setOn.bind(gpioAccessory));
+  accessory.getService(Service.Switch)
+    .getCharacteristic(Characteristic.On)
+    .on('get', jemaAccessory.getOn.bind(jemaAccessory))
+    .on('set', jemaAccessory.setOn.bind(jemaAccessory));
   
-  if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
-    accessory.getService(Service.Switch)
-      .getCharacteristic(Characteristic.On)
-      .on('get', gpioAccessory.getOn.bind(gpioAccessory))
-      .on('set', gpioAccessory.setOn.bind(gpioAccessory));
-  }
+  // if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
+  //   accessory.getService(Service.Switch)
+  //     .getCharacteristic(Characteristic.On)
+  //     .on('get', gpioAccessory.getOn.bind(gpioAccessory))
+  //     .on('set', gpioAccessory.setOn.bind(gpioAccessory));
+  // }
 
-  if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
-    accessory.getService(Service.ContactSensor)
-      .getCharacteristic(Characteristic.ContactSensorState)
-      .on('get', gpioAccessory.getOn.bind(gpioAccessory));
-  }
+  // if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
+  //   accessory.getService(Service.ContactSensor)
+  //     .getCharacteristic(Characteristic.ContactSensorState)
+  //     .on('get', gpioAccessory.getOn.bind(gpioAccessory));
+  // }
 
   // Handle the 'identify' event
   accessory.on('identify', function(paired, callback) {
@@ -117,45 +129,84 @@ WPiPlatform.prototype.configurationRequestHandler = function(context, request, c
 }
 
 // Sample function to show how developer can add accessory dynamically from outside event
-WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
+// WPiPlatform.prototype.addGPIOPin = function(gpiopin) {
+//   var platform = this;
+//   var uuid;
+
+//   uuid = UUIDGen.generate(gpiopin.name);
+
+//   var uuidExists = this.accessories.filter(function(item) {
+//     return item.UUID == uuid;
+//   }).length;
+
+//   if (uuidExists == 0) {
+//     this.log("New GPIO from config.json: " + gpiopin.name + " (" + gpiopin.pin + ")");
+  
+//     var newAccessory = new Accessory(gpiopin.name, uuid);
+    
+//     newAccessory.getService(Service.AccessoryInformation)
+//       .setCharacteristic(Characteristic.Manufacturer, platform.config.manufacturer ? platform.config.manufacturer : "Raspberry Pi Foundation")
+//       .setCharacteristic(Characteristic.Model, platform.config.model ? platform.config.model : "Pi GPIO")
+//       .setCharacteristic(Characteristic.SerialNumber, platform.config.serial ? platform.config.serial : "Default-SerialNumber");
+
+//     switch(gpiopin.mode) {
+//       case "out":
+//         newAccessory.addService(Service.Switch, gpiopin.name);
+//         break;
+//       case "in":
+//         newAccessory.addService(Service.ContactSensor, gpiopin.name);
+//         break;
+//       default:
+//         platform.log("WARNING: Unsupported GPIO Pin Mode (%s)", gpiopin.mode);
+//     }
+    
+//     newAccessory.context = gpiopin;
+        
+//     this.configureAccessory(newAccessory);
+//     this.api.registerPlatformAccessories("homebridge-WPiJEMAPlatform", "WPiPlatform", [newAccessory]);
+//   }
+// }
+
+WPiPlatform.prototype.addTerminal = function(terminal) {
   var platform = this;
   var uuid;
 
-  uuid = UUIDGen.generate(gpiopin.name);
+  // uuid = UUIDGen.generate(gpiopin.name);
+  uuid = UUIDGen.generate(terminal.name);
 
   var uuidExists = this.accessories.filter(function(item) {
     return item.UUID == uuid;
   }).length;
 
   if (uuidExists == 0) {
-    this.log("New GPIO from config.json: " + gpiopin.name + " (" + gpiopin.pin + ")");
+    this.log("New JEMA Terminal from config.json: " + terminal.name + " (" + terminal.pin + ")");
   
-    var newAccessory = new Accessory(gpiopin.name, uuid);
+    var newAccessory = new Accessory(terminal.name, uuid);
     
     newAccessory.getService(Service.AccessoryInformation)
       .setCharacteristic(Characteristic.Manufacturer, platform.config.manufacturer ? platform.config.manufacturer : "Raspberry Pi Foundation")
       .setCharacteristic(Characteristic.Model, platform.config.model ? platform.config.model : "Pi GPIO")
       .setCharacteristic(Characteristic.SerialNumber, platform.config.serial ? platform.config.serial : "Default-SerialNumber");
 
-    switch(gpiopin.mode) {
-      case "out":
-        newAccessory.addService(Service.Switch, gpiopin.name);
-        break;
-      case "in":
-        newAccessory.addService(Service.ContactSensor, gpiopin.name);
-        break;
-      default:
-        platform.log("WARNING: Unsupported GPIO Pin Mode (%s)", gpiopin.mode);
-    }
+    newAccessory.addService(Service.Switch, terminal.name);
+
+    // switch(gpiopin.mode) {
+    //   case "out":
+    //     newAccessory.addService(Service.Switch, gpiopin.name);
+    //     break;
+    //   case "in":
+    //     newAccessory.addService(Service.ContactSensor, gpiopin.name);
+    //     break;
+    //   default:
+    //     platform.log("WARNING: Unsupported GPIO Pin Mode (%s)", gpiopin.mode);
+    // }
     
-    newAccessory.context = gpiopin;
+    newAccessory.context = terminal;
         
     this.configureAccessory(newAccessory);
-    this.api.registerPlatformAccessories("homebridge-WPiPlatform", "WiringPiPlatform", [newAccessory]);
+    this.api.registerPlatformAccessories("homebridge-WPiJEMAPlatform", "WPiPlatform", [newAccessory]);
   }
 }
-
-
 
 
 WPiPlatform.prototype.updateAccessoriesReachability = function() {
@@ -169,7 +220,7 @@ WPiPlatform.prototype.updateAccessoriesReachability = function() {
 // Sample function to show how developer can remove accessory dynamically from outside event
 WPiPlatform.prototype.removeAccessory = function(accessory) {
   this.log("Remove Accessory");
-  this.api.unregisterPlatformAccessories("homebridge-WPiPlatform", "WPiPlatform", this.accessories);
+  this.api.unregisterPlatformAccessories("homebridge-WPiJEMAPlatform", "WPiPlatform", this.accessories);
 
   this.accessories = [];
 }
@@ -188,13 +239,15 @@ WPiPlatform.prototype.statePolling = function () {
         for (var deviceID in platform.accessories) {
           var accessory = platform.accessories[deviceID];
           if(accessory.context.polling === "true") {
-            if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
-              accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).getValue();
-            }
+            accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).getValue();
 
-            if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
-              accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
-            }
+            // if (accessory.getService(Service.Switch) && accessory.context.mode === "out") {
+            //   accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).getValue();
+            // }
+
+            // if (accessory.getService(Service.ContactSensor) && accessory.context.mode === "in") {
+            //   accessory.getService(Service.ContactSensor).getCharacteristic(Characteristic.ContactSensorState).getValue();
+            // }
           }
         }
       

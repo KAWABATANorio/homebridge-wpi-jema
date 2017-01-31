@@ -1,14 +1,15 @@
-# Homebridge GPIO WiringPi - Platform Plugin
+# Homebridge WiringPi JEMA - Platform Plugin
 
 ***
 
 ## WORK IN PROGRESS
 
-Please report issues at https://github.com/rsg98/homebridge-gpio-wpi2/issues
+Please report issues at https://github.com/KAWABATANorio/homebridge-wpi-jema/issues
 
 ***
 
-Supports triggering General Purpose Input Output (GPIO) pins on the Raspberry Pi.
+Supports JEMA terminal (JEM-A 1427) on the Raspberry Pi.  
+https://www.jema-net.or.jp/
 
 Uses wiringPi as a back end to give non-root access to GPIO.
 
@@ -24,7 +25,7 @@ for more details, or just follow the instructions below for Raspbian.
 
 1.	Install the wiringpi package using `sudo apt-get install wiringpi`
 2.    Install Homebridge using `sudo npm install -g homebridge`
-3.	Install this plugin `sudo npm install -g homebridge-gpio-wpi2`
+3.	Install this plugin `sudo npm install -g homebridge-wpi-jema`
 4.	Update your configuration file - see `config-platform-sample.json` in this repo
 5.    Make sure your `homebridge` user is in the `gpio` group.
 
@@ -39,49 +40,56 @@ for more details, or just follow the instructions below for Raspbian.
 You can run `gpio readall` to generate a table showing how the BCM pin numbers map to the physical pins, which varies between models of Raspberry Pi.
 
 ```json
-{ 
-    "platforms": [{
-          "platform" : "WiringPiPlatform",
-          "name" : "Pi GPIO (WiringPi)",
-          "overrideCache" : "true",
-          "autoExport" : "true",
-          "gpiopins" : [{
-                "name" : "GPIO2",
-                "pin"  : 27,
-                "enabled" : "true",
-                "mode" : "out",
-                "pull" : "down",
-                "inverted" : "false",
-                "duration" : 0,
-                "polling" : "true"
-	        },{
-                "name" : "GPIO3",
-                "pin"  : 22,
-                "enabled" : "true",
-                "mode" : "out",
-                "pull" : "down",
-                "inverted" : "false",
-                "duration" : 0
-          }]
+{
+  "platforms": [{
+    "platform" : "WiringPiJEMAPlatform",
+    "name" : "Pi JEMA (WiringPi)",
+    "overrideCache" : "false",
+    "autoExport" : "true",
+    "terminals": [{
+      "name": "Floor heater",
+      "monitorPin": {
+        "pin"  : 18,
+        "enabled" : "true",
+        "mode" : "in",
+        "pull" : "down",
+        "inverted" : "true",
+        "duration" : 0,
+        "polling": "true"
+      },
+      "controlPin": {
+        "pin"  : 23,
+        "enabled" : "true",
+        "mode" : "out",
+        "pull" : "down",
+        "inverted" : "false",
+        "duration" : 1000
+      }
     }]
+  }]
 }
-
 ```
 ### Platform Config Items
 
 | Config Item | Valid Values | Description |
 | --- | --- | --- |
-| `platform` | `WiringPiPlatform` | Must be set to this value to initialise this plugin |
+| `platform` | `WiringPiJEMAPlatform` | Must be set to this value to initialise this plugin |
 | `name` | `string` | What you want this platform to be called (appears in the logs and such like) |
 | `overrideCache` | `true / false` | Homebridge will cache all your accessories - setting this to true will ignore the cached value (direction, mode, etc.) and read them direcly from your config file |
 | `autoExport` | `true / false` | As long as your homebridge user has permission (i.e. is a member of the `gpio` group), setting this to `true` will automatically export the pins via sysfs, meaning you _don't_ need a set-gpio.sh script |
 
+### Terminal Config Items
+
+| Config Item | Valid Values | Description |
+| --- | --- | --- |
+| `name` | `string` | Initial display name for the terminal accessory - can be renamed in HomeKit app (e.g. Home) |
+| `monitorPin` | `object` | Config item for the GPIO pin using monitoring |
+| `controlPin` | `object` | Config item for the GPIO pin using control |
 
 ### Pin Config Items
 
 | Config Item | Valid Values | Description |
 | --- | --- | --- |
-| `name` | `string` | Initial display name for the PIN accessory - can be renamed in HomeKit app (e.g. Home) |
 | `pin` | `number` | The BCM pin number - see Pin Configuration below |
 | `enabled` | `true / false` | Whether you want the module to publish this pin as an accessory |
 | `mode` | `out / in` | Mode the pin should operate in |
@@ -163,8 +171,9 @@ $ node make-gpio-script config.json set-gpio.sh
 
 (The MIT License)
 
-Copyright (c) 2016 Richard Grime richard.grime@gmail.com
+Copyright (c) KAWABATA Norio moba@kawabatafarm.jp
 
+Original Project Copyright (c) 2016 Richard Grime richard.grime@gmail.com  
 Original Project Copyright (c) 2016 James Blanksby james@blanks.by
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:

@@ -1,14 +1,14 @@
 {
-	"name": "homebridge-gpio-wpi2",
-	"version": "0.1.2",
-	"description": "Raspberry Pi GPIO plugin for Homebridge (Wiring-pi backend): https://github.com/nfarina/homebridge",
+	"name": "homebridge-wpi-hema",
+	"version": "0.0.1",
+	"description": "Raspberry Pi JEMA terminal (JEM-A 1427) plugin for Homebridge (Wiring-pi backend): https://github.com/nfarina/homebridge",
 	"license": "MIT",
 	"keywords": [
 		"homebridge-plugin"
 	],
 	"repository": {
 		"type": "git",
-		"url": "git://github.com/rsg98/homebridge-gpio-wpi2.git"
+		"url": "git://github.com/KAWABATANorio/homebridge-wpi-jema.git"
 	},
 	"engines": {
 		"node": ">=6.8.1",
