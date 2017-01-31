@@ -1,6 +1,6 @@
 {
   "name": "homebridge-wpi-jema",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Raspberry Pi JEMA terminal (JEM-A 1427) plugin for Homebridge (Wiring-pi backend): https://github.com/nfarina/homebridge",
   "license": "MIT",
   "keywords": [
