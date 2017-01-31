@@ -22,7 +22,7 @@ module.exports = function(homebridge) {
 }
 
 // Platform constructor
-function JEMAPlatform(log, config, api) {
+function WPiPlatform(log, config, api) {
   log("WORK IN PROGRESS... Report issues on https://github.com/KAWABATANorio/homebridge-gpio-jema");
   var platform = this;
   this.log = log;
