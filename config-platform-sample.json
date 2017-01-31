@@ -7,7 +7,6 @@
     "terminals": [{
       "name": "Floor heater",
       "monitorPin": {
-        "name" : "GPIO18",
         "pin"  : 18,
         "enabled" : "true",
         "mode" : "in",
@@ -17,7 +16,6 @@
         "polling": "true"
       },
       "controlPin": {
-        "name" : "GPI23",
         "pin"  : 23,
         "enabled" : "true",
         "mode" : "out",

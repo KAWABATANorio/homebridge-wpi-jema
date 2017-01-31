@@ -8,7 +8,7 @@ Please report issues at https://github.com/KAWABATANorio/homebridge-wpi-jema/iss
 
 ***
 
-Supports JEMA terminal (JEM-A 1427) on the Raspberry Pi.
+Supports JEMA terminal (JEM-A 1427) on the Raspberry Pi.  
 https://www.jema-net.or.jp/
 
 Uses wiringPi as a back end to give non-root access to GPIO.
@@ -49,7 +49,6 @@ You can run `gpio readall` to generate a table showing how the BCM pin numbers m
     "terminals": [{
       "name": "Floor heater",
       "monitorPin": {
-        "name" : "GPIO18",
         "pin"  : 18,
         "enabled" : "true",
         "mode" : "in",
@@ -59,7 +58,6 @@ You can run `gpio readall` to generate a table showing how the BCM pin numbers m
         "polling": "true"
       },
       "controlPin": {
-        "name" : "GPI23",
         "pin"  : 23,
         "enabled" : "true",
         "mode" : "out",
@@ -80,12 +78,18 @@ You can run `gpio readall` to generate a table showing how the BCM pin numbers m
 | `overrideCache` | `true / false` | Homebridge will cache all your accessories - setting this to true will ignore the cached value (direction, mode, etc.) and read them direcly from your config file |
 | `autoExport` | `true / false` | As long as your homebridge user has permission (i.e. is a member of the `gpio` group), setting this to `true` will automatically export the pins via sysfs, meaning you _don't_ need a set-gpio.sh script |
 
+### Terminal Config Items
+
+| Config Item | Valid Values | Description |
+| --- | --- | --- |
+| `name` | `string` | Initial display name for the terminal accessory - can be renamed in HomeKit app (e.g. Home) |
+| `monitorPin` | `object` | Config item for the GPIO pin using monitoring |
+| `controlPin` | `object` | Config item for the GPIO pin using control |
 
 ### Pin Config Items
 
 | Config Item | Valid Values | Description |
 | --- | --- | --- |
-| `name` | `string` | Initial display name for the PIN accessory - can be renamed in HomeKit app (e.g. Home) |
 | `pin` | `number` | The BCM pin number - see Pin Configuration below |
 | `enabled` | `true / false` | Whether you want the module to publish this pin as an accessory |
 | `mode` | `out / in` | Mode the pin should operate in |
@@ -169,7 +173,7 @@ $ node make-gpio-script config.json set-gpio.sh
 
 Copyright (c) KAWABATA Norio moba@kawabatafarm.jp
 
-Original Project Copyright (c) 2016 Richard Grime richard.grime@gmail.com
+Original Project Copyright (c) 2016 Richard Grime richard.grime@gmail.com  
 Original Project Copyright (c) 2016 James Blanksby james@blanks.by
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
