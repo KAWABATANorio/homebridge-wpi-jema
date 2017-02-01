@@ -17,11 +17,11 @@ module.exports = function (homebridge) {
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
 
-  homebridge.registerPlatform("homebridge-gpio-jema", "WiringPiJEMAPlatform", WPiPlatform, false);
+  homebridge.registerPlatform("homebridge-gpio-jema", "WiringPiJEMAPlatform", JEMAPlatform, false);
 }
 
 // Platform constructor
-function WPiPlatform(log, config, api) {
+function JEMAPlatform(log, config, api) {
   log("WORK IN PROGRESS... Report issues on https://github.com/KAWABATANorio/homebridge-gpio-jema");
   var platform = this;
   this.log = log;
@@ -61,7 +61,7 @@ function WPiPlatform(log, config, api) {
 }
 
 // Function invoked when homebridge tries to restore cached accessory
-WPiPlatform.prototype.configureAccessory = function (accessory) {
+JEMAPlatform.prototype.configureAccessory = function (accessory) {
   this.log(accessory.displayName, "Configure GPIO Pin", accessory.UUID);
   var platform = this;
 
@@ -71,10 +71,12 @@ WPiPlatform.prototype.configureAccessory = function (accessory) {
   }
 
   //Check reachability by querying the sysfs path
-  var exportState = sysfs(accessory.context.pin);
+  var exportMonitorState = sysfs(accessory.context.monitorPin.pin);
+  var exportControlState = sysfs(accessory.context.controlPin.pin);
 
-  if (!exportState.error) {
-    if (exportState.direction === accessory.context.mode) {
+  if (!exportMonitorState.error && !exportControlState.error) {
+    if (exportMonitorState.direction === accessory.context.monitorPin.mode
+      && exportControlState.direction === accessory.context.controlPin.mode) {
       accessory.reachable = true;
     }
   }
@@ -106,11 +108,11 @@ WPiPlatform.prototype.configureAccessory = function (accessory) {
 
 //Handler will be invoked when user try to config your plugin
 //Callback can be cached and invoke when nessary
-WPiPlatform.prototype.configurationRequestHandler = function (context, request, callback) {
+JEMAPlatform.prototype.configurationRequestHandler = function (context, request, callback) {
   console.log("Not Implemented");
 }
 
-WPiPlatform.prototype.addTerminal = function (terminal) {
+JEMAPlatform.prototype.addTerminal = function (terminal) {
   var platform = this;
   var uuid;
 
@@ -135,11 +137,11 @@ WPiPlatform.prototype.addTerminal = function (terminal) {
     newAccessory.context = terminal;
 
     this.configureAccessory(newAccessory);
-    this.api.registerPlatformAccessories("homebridge-WPiJEMAPlatform", "WPiPlatform", [newAccessory]);
+    this.api.registerPlatformAccessories("homebridge-WPiJEMAPlatform", "JEMAPlatform", [newAccessory]);
   }
 }
 
-WPiPlatform.prototype.updateAccessoriesReachability = function () {
+JEMAPlatform.prototype.updateAccessoriesReachability = function () {
   this.log("Update Reachability");
   for (var index in this.accessories) {
     var accessory = this.accessories[index];
@@ -148,16 +150,16 @@ WPiPlatform.prototype.updateAccessoriesReachability = function () {
 }
 
 // Sample function to show how developer can remove accessory dynamically from outside event
-WPiPlatform.prototype.removeAccessory = function (accessory) {
+JEMAPlatform.prototype.removeAccessory = function (accessory) {
   this.log("Remove Accessory");
-  this.api.unregisterPlatformAccessories("homebridge-WPiJEMAPlatform", "WPiPlatform", this.accessories);
+  this.api.unregisterPlatformAccessories("homebridge-WPiJEMAPlatform", "JEMAPlatform", this.accessories);
 
   this.accessories = [];
 }
 
 
 // Method for state periodic update
-WPiPlatform.prototype.statePolling = function () {
+JEMAPlatform.prototype.statePolling = function () {
   var platform = this;
 
   // Clear polling
