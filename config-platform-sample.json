@@ -7,7 +7,7 @@
       "autoExport": true,
       "terminals": [
         {
-          "name": "Floor heater",
+          "name": "Sample-Floor heater",
           "monitorPin": {
             "pin": 18,
             "enabled": true,

@@ -65,9 +65,8 @@ WPiPlatform.prototype.configureAccessory = function (accessory) {
   this.log(accessory.displayName, "Configure GPIO Pin", accessory.UUID);
   var platform = this;
 
-  if (platform.config.overrideCache === "true") {
+  if (platform.config.overrideCache === true) {
     var newContext = platform.terminals.find(p => p.name === accessory.context.name);
-    // var newContext = platform.gpiopins.find( p => p.name === accessory.context.name );
     accessory.context = newContext;
   }
 
@@ -169,7 +168,7 @@ WPiPlatform.prototype.statePolling = function () {
     // Update states for all HomeKit accessories
     for (var deviceID in platform.accessories) {
       var accessory = platform.accessories[deviceID];
-      if (accessory.context.polling === "true") {
+      if (accessory.context.polling === true) {
         accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).getValue();
       }
     }
