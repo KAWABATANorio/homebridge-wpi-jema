@@ -41,32 +41,36 @@ You can run `gpio readall` to generate a table showing how the BCM pin numbers m
 
 ```json
 {
-  "platforms": [{
-    "platform" : "WiringPiJEMAPlatform",
-    "name" : "Pi JEMA (WiringPi)",
-    "overrideCache" : "false",
-    "autoExport" : "true",
-    "terminals": [{
-      "name": "Floor heater",
-      "monitorPin": {
-        "pin"  : 18,
-        "enabled" : "true",
-        "mode" : "in",
-        "pull" : "down",
-        "inverted" : "true",
-        "duration" : 0,
-        "polling": "true"
-      },
-      "controlPin": {
-        "pin"  : 23,
-        "enabled" : "true",
-        "mode" : "out",
-        "pull" : "down",
-        "inverted" : "false",
-        "duration" : 1000
-      }
-    }]
-  }]
+  "platforms": [
+    {
+      "platform": "WiringPiJEMAPlatform",
+      "name": "Pi JEMA (WiringPi)",
+      "overrideCache": false,
+      "autoExport": true,
+      "terminals": [
+        {
+          "name": "Floor heater",
+          "monitorPin": {
+            "pin": 18,
+            "enabled": true,
+            "mode": "in",
+            "pull": "down",
+            "inverted": true,
+            "duration": 0,
+            "polling": true
+          },
+          "controlPin": {
+            "pin": 23,
+            "enabled": true,
+            "mode": "out",
+            "pull": "down",
+            "inverted": false,
+            "duration": 1000
+          }
+        }
+      ]
+    }
+  ]
 }
 ```
 ### Platform Config Items
