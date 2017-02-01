@@ -34,7 +34,7 @@ function JEMAPlatform(log, config, api) {
   }
 
   //Export pins via sysfs if enabled with autoExport
-  if ((typeof this.config.autoExport !== undefined) && (this.config.autoExport === "true")) {
+  if ((typeof this.config.autoExport !== undefined) && (this.config.autoExport == true)) {
     AutoExport(this.log, this.gpiopins);
   }
 
@@ -65,7 +65,7 @@ JEMAPlatform.prototype.configureAccessory = function (accessory) {
   this.log(accessory.displayName, "Configure GPIO Pin", accessory.UUID);
   var platform = this;
 
-  if (platform.config.overrideCache === true) {
+  if (platform.config.overrideCache == true) {
     var newContext = platform.terminals.find(p => p.name === accessory.context.name);
     accessory.context = newContext;
   }
@@ -123,7 +123,7 @@ JEMAPlatform.prototype.addTerminal = function (terminal) {
   }).length;
 
   if (uuidExists == 0) {
-    this.log("New JEMA Terminal from config.json: " + terminal.name + " (" + terminal.controlPin.pin + ")");
+    this.log("New JEMA Terminal from config.json: " + terminal.name + " (" + terminal.controlPin.pin + ", " + terminal.monitorPin.pin + ")");
 
     var newAccessory = new Accessory(terminal.name, uuid);
 
@@ -157,7 +157,6 @@ JEMAPlatform.prototype.removeAccessory = function (accessory) {
   this.accessories = [];
 }
 
-
 // Method for state periodic update
 JEMAPlatform.prototype.statePolling = function () {
   var platform = this;
@@ -170,7 +169,7 @@ JEMAPlatform.prototype.statePolling = function () {
     // Update states for all HomeKit accessories
     for (var deviceID in platform.accessories) {
       var accessory = platform.accessories[deviceID];
-      if (accessory.context.polling === true) {
+      if (accessory.context.monitorPin.polling == true) {
         accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).getValue();
       }
     }
