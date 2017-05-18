@@ -1,5 +1,6 @@
 const wpi = require('node-wiring-pi');
 
+
 const sysfs = require('./lib/readExports.js');
 const JEMAAccessory = require('./lib/JEMAAccessory.js');
 const AutoExport = require('./lib/autoExport.js');
@@ -74,14 +75,14 @@ JEMAPlatform.prototype.configureAccessory = function (accessory) {
   var exportMonitorState = sysfs(accessory.context.monitorPin.pin);
   var exportControlState = sysfs(accessory.context.controlPin.pin);
 
+  accessory.reachable = false;
+
   if (!exportMonitorState.error && !exportControlState.error) {
     if (exportMonitorState.direction === accessory.context.monitorPin.mode
       && exportControlState.direction === accessory.context.controlPin.mode) {
       accessory.reachable = true;
     }
   }
-
-  accessory.reachable = true;
 
   var onChar;
   if (accessory.getService(Service.Switch)) {
@@ -161,9 +162,6 @@ JEMAPlatform.prototype.removeAccessory = function (accessory) {
 JEMAPlatform.prototype.statePolling = function () {
   var platform = this;
 
-  // Clear polling
-  //clearTimeout(this.tout);
-
   // Setup periodic update with polling interval
   this.tout = setTimeout(function () {
     // Update states for all HomeKit accessories
@@ -176,6 +174,5 @@ JEMAPlatform.prototype.statePolling = function () {
 
     // Setup next polling
     platform.statePolling();
-
   }, 2000);
 }
